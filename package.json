@@ -1,0 +1,14 @@
+{
+  "name": "blog-platform-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "db:setup": "cd backend && node -e \"require('./src/config/initDb')().then(() => require('./src/config/seed')()).then(() => process.exit())\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
