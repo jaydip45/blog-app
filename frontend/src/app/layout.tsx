@@ -6,9 +6,14 @@ import Navbar from "@/components/layout/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "DevBlog | Modern Blog Platform",
-  description: "A full-stack blog platform built with Next.js and Node.js",
+export const metadata = {
+  title: {
+    default: "DevBlog",
+    template: "%s | DevBlog",
+  },
+  description:
+    "Read latest blogs on development, cricket updates, and tech news.",
+  metadataBase: new URL("https://blog-app-gamma-smoky.vercel.app"),
   keywords: ["blog", "cricket", "technology", "coding", "devblog", "nextjs"],
 };
 
