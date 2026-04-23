@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://blog-app-gamma-smoky.vercel.app/sitemap.xml",
-    host: "https://blog-app-gamma-smoky.vercel.app",
+    sitemap: "https://blog-app-alpha-snowy.vercel.app/sitemap.xml",
+    host: "https://blog-app-alpha-snowy.vercel.app",
   };
 }

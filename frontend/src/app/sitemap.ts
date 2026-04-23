@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://blog-app-gamma-smoky.vercel.app";
+    const baseUrl = "https://blog-app-alpha-snowy.vercel.app";
 
     const res = await fetch(
         "https://blog-app-production-a6bc.up.railway.app/api/posts"
