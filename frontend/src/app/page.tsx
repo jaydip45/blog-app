@@ -15,17 +15,17 @@ export default function Home() {
       {/* Hero Section */}
       <section className="text-center mb-16 space-y-4">
         <h1 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 dark:text-white">
-          Small steps, <span className="text-indigo-600 italic">giant-leaps</span>.
+          Ideas that build.<span className="text-indigo-600 italic">Stories that connect.</span>
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Explore the world of development, design, and cricket through the eyes of our passionate writers.
+          Exploring code, creativity, and cricket through real experiences.
         </p>
       </section>
 
       {/* Featured Posts Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0">
         <h2 className="text-3xl font-bold">Latest Stories</h2>
-        
+
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input

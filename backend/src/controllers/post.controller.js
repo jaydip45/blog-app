@@ -137,8 +137,8 @@ const createPost = async (req, res) => {
       .replace(/--+/g, '-') + '-' + Date.now();
 
     await pool.query(`
-      INSERT INTO post (id, title, slug, content, excerpt, primaryKeywords, secondaryKeywords, longTailKeywords, coverImage, published, authorId, categoryId)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO post (id, title, slug, content, excerpt, primaryKeywords, secondaryKeywords, longTailKeywords, coverImage, published, authorId, categoryId, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [id, title, slug, content, excerpt, primaryKeywords, secondaryKeywords, longTailKeywords, coverImage, published, req.user.id, categoryId]);
 
     if (tags && tags.length > 0) {
@@ -171,7 +171,7 @@ const updatePost = async (req, res) => {
 
     await pool.query(`
       UPDATE post 
-      SET title = ?, content = ?, excerpt = ?, primaryKeywords = ?, secondaryKeywords = ?, longTailKeywords = ?, coverImage = ?, published = ?, categoryId = ?
+      SET title = ?, content = ?, excerpt = ?, primaryKeywords = ?, secondaryKeywords = ?, longTailKeywords = ?, coverImage = ?, published = ?, categoryId = ?, updatedAt = NOW()
       WHERE id = ?
     `, [title, content, excerpt, primaryKeywords, secondaryKeywords, longTailKeywords, coverImage, published, categoryId, id]);
 

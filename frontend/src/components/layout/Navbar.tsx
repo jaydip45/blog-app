@@ -15,7 +15,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-2">
             <Feather className="w-8 h-8 text-indigo-600" />
-            <span className="text-xl font-bold tracking-tight">DevBlog</span>
+            <span className="text-xl font-bold tracking-tight">Blogger</span>
           </Link>
 
           {/* Desktop Menu */}
