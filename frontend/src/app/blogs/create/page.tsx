@@ -59,6 +59,22 @@ export default function CreatePostPage() {
     fetchTaxonomy();
   }, [isAuthenticated, user, router]);
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (val.includes('google.com/imgres')) {
+      try {
+        const url = new URL(val);
+        const imgurl = url.searchParams.get('imgurl');
+        if (imgurl) {
+          val = imgurl;
+        }
+      } catch (err) {
+        // ignore invalid url
+      }
+    }
+    setCoverImage(val);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createPost.mutate({
@@ -150,7 +166,7 @@ export default function CreatePostPage() {
                 placeholder="https://..."
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm outline-none"
                 value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
+                onChange={handleCoverImageChange}
               />
             </div>
           </div>
