@@ -2,6 +2,19 @@ const pool = require('../config/db');
 const { createPostSchema, updatePostSchema } = require('../validations/post.validation');
 const { v4: uuidv4 } = require('uuid');
 
+const getClientIp = (req) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.ip || req.socket?.remoteAddress || null;
+};
+
+const shouldTrackView = (req) => {
+  const t = req.query.track;
+  return t !== '0' && t !== 'false';
+};
+
 const getPosts = async (req, res) => {
   const { page = 1, limit = 10, search, category, tag } = req.query;
   const skip = (page - 1) * limit;
@@ -45,7 +58,11 @@ const getPosts = async (req, res) => {
     const countParams = [];
     if (search) { countQuery += ' AND (p.title LIKE ? OR p.content LIKE ?)'; countParams.push(`%${search}%`, `%${search}%`); }
     if (category) { countQuery += ' AND c.slug = ?'; countParams.push(category); }
-    
+    if (tag) {
+      countQuery += ' AND p.id IN (SELECT A FROM _posttotag pt JOIN tag t ON pt.B = t.id WHERE t.slug = ?)';
+      countParams.push(tag);
+    }
+
     const [countRes] = await pool.query(countQuery, countParams);
     const total = countRes[0]?.total || 0;
 
@@ -72,6 +89,7 @@ const getPosts = async (req, res) => {
 
 const getPostBySlug = async (req, res) => {
   const { slug } = req.params;
+  const trackView = shouldTrackView(req);
 
   try {
     const [posts] = await pool.query(`
@@ -105,7 +123,21 @@ const getPostBySlug = async (req, res) => {
       ORDER BY c.createdAt DESC
     `, [post.id]);
 
-    await pool.query('UPDATE post SET views = views + 1 WHERE id = ?', [post.id]);
+    if (trackView) {
+      await pool.query('UPDATE post SET views = views + 1 WHERE id = ?', [post.id]);
+      const viewId = uuidv4();
+      const ip = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || null;
+      await pool.query(
+        'INSERT INTO post_view (id, postId, ip, userAgent) VALUES (?, ?, ?, ?)',
+        [viewId, post.id, ip, userAgent]
+      );
+    }
+
+    const [[likeAgg]] = await pool.query(
+      'SELECT COUNT(*) as c FROM `like` WHERE postId = ?',
+      [post.id]
+    );
 
     const formattedPost = {
       ...post,
@@ -116,10 +148,43 @@ const getPostBySlug = async (req, res) => {
         ...c,
         user: { name: c.userName, avatar: c.userAvatar }
       })),
-      _count: { likes: 0 }
+      _count: { likes: Number(likeAgg?.c) || 0 }
     };
 
     res.json(formattedPost);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** Records a view from the reader's browser (correct IP). Dedupes rapid repeats (e.g. React Strict Mode). */
+const recordPostView = async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    const [posts] = await pool.query('SELECT id FROM post WHERE slug = ?', [slug]);
+    const post = posts[0];
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const ip = getClientIp(req);
+    const userAgent = req.headers['user-agent'] || null;
+
+    const [recent] = await pool.query(
+      `SELECT id FROM post_view WHERE postId = ? AND ip <=> ? AND viewedAt > DATE_SUB(NOW(), INTERVAL 15 SECOND) LIMIT 1`,
+      [post.id, ip]
+    );
+    if (recent.length > 0) {
+      return res.status(204).send();
+    }
+
+    await pool.query('UPDATE post SET views = views + 1 WHERE id = ?', [post.id]);
+    await pool.query(
+      'INSERT INTO post_view (id, postId, ip, userAgent) VALUES (?, ?, ?, ?)',
+      [uuidv4(), post.id, ip, userAgent]
+    );
+    res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -206,9 +271,35 @@ const deletePost = async (req, res) => {
   }
 };
 
+const getPostViews = async (req, res) => {
+  const { id } = req.params;
+  const limit = Math.min(Number(req.query.limit) || 100, 500);
+
+  try {
+    const [posts] = await pool.query('SELECT authorId FROM post WHERE id = ?', [id]);
+    const post = posts[0];
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    if (post.authorId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT id, ip, userAgent, viewedAt FROM post_view WHERE postId = ? ORDER BY viewedAt DESC LIMIT ?`,
+      [id, limit]
+    );
+    res.json({ views: rows });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPosts,
   getPostBySlug,
+  recordPostView,
+  getPostViews,
   createPost,
   updatePost,
   deletePost,

@@ -1,8 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List, ListOrdered, Quote, Heading1, Heading2 } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Quote, Heading1, Heading2, CornerDownLeft, Minus } from 'lucide-react';
 
 export default function Editor({ content, onChange }: { content: string, onChange: (content: string) => void }) {
   const editor = useEditor({
@@ -21,9 +22,25 @@ export default function Editor({ content, onChange }: { content: string, onChang
 
   if (!editor) return null;
 
-  const MenuButton = ({ onClick, isActive, children }: any) => (
+  const MenuButton = ({
+    onClick,
+    isActive,
+    title,
+    children,
+  }: {
+    onClick: () => void;
+    isActive?: boolean;
+    title?: string;
+    children: ReactNode;
+  }) => (
     <button
-      onClick={(e) => { e.preventDefault(); onClick(); }}
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
       className={`p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${isActive ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
     >
       {children}
@@ -33,26 +50,73 @@ export default function Editor({ content, onChange }: { content: string, onChang
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
       <div className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-2 flex flex-wrap gap-1">
-        <MenuButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')}>
+        <MenuButton
+          title="Bold"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive('bold')}
+        >
           <Bold className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')}>
+        <MenuButton
+          title="Italic"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive('italic')}
+        >
           <Italic className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive('heading', { level: 1 })}>
+        <MenuButton
+          title="Heading 1 — large section title"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          isActive={editor.isActive('heading', { level: 1 })}
+        >
           <Heading1 className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })}>
+        <MenuButton
+          title="Heading 2 — subsection title"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          isActive={editor.isActive('heading', { level: 2 })}
+        >
           <Heading2 className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')}>
+        <MenuButton
+          title="Bullet list"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          isActive={editor.isActive('bulletList')}
+        >
           <List className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')}>
+        <MenuButton
+          title="Numbered list"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          isActive={editor.isActive('orderedList')}
+        >
           <ListOrdered className="w-5 h-5" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive('blockquote')}>
+        <MenuButton
+          title="Blockquote — indented quote style"
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          isActive={editor.isActive('blockquote')}
+        >
           <Quote className="w-5 h-5" />
+        </MenuButton>
+        <span className="w-px h-8 bg-slate-200 dark:bg-slate-600 self-center mx-1" aria-hidden />
+        <MenuButton
+          title="New paragraph — start a new block with space after the previous one (same as Enter)"
+          onClick={() => editor.chain().focus().splitBlock().run()}
+        >
+          <span className="text-xs font-bold px-0.5">¶</span>
+        </MenuButton>
+        <MenuButton
+          title="Line break — new line inside the same paragraph (Shift+Enter)"
+          onClick={() => editor.chain().focus().setHardBreak().run()}
+        >
+          <CornerDownLeft className="w-5 h-5" />
+        </MenuButton>
+        <MenuButton
+          title="Spacer line — horizontal rule for a clear gap between sections"
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+        >
+          <Minus className="w-5 h-5" />
         </MenuButton>
       </div>
       <EditorContent editor={editor} />

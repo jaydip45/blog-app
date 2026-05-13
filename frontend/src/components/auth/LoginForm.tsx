@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/services/api';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -19,6 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginForm() {
   const { setAuth } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +33,10 @@ export default function LoginForm() {
     try {
       const response = await api.post('/auth/login', data);
       setAuth(response.data, response.data.token);
-      router.push('/');
+      const rawNext = searchParams.get('next');
+      const next =
+        rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
+      router.push(next);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {

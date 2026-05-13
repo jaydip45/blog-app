@@ -46,6 +46,11 @@ const deleteComment = async (req, res) => {
   }
 };
 
+const likeCountForPost = async (postId) => {
+  const [[row]] = await pool.query('SELECT COUNT(*) as c FROM `like` WHERE postId = ?', [postId]);
+  return Number(row?.c) || 0;
+};
+
 const toggleLike = async (req, res) => {
   const { postId } = req.body;
   try {
@@ -56,14 +61,30 @@ const toggleLike = async (req, res) => {
 
     if (likes.length > 0) {
       await pool.query('DELETE FROM `like` WHERE postId = ? AND userId = ?', [postId, req.user.id]);
-      return res.json({ liked: false });
+      const likeCount = await likeCountForPost(postId);
+      return res.json({ liked: false, likeCount });
     }
 
     await pool.query(
       'INSERT INTO `like` (id, postId, userId) VALUES (?, ?, ?)',
       [uuidv4(), postId, req.user.id]
     );
-    res.json({ liked: true });
+    const likeCount = await likeCountForPost(postId);
+    res.json({ liked: true, likeCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getLikeStatus = async (req, res) => {
+  const { postId } = req.params;
+  try {
+    const [mine] = await pool.query(
+      'SELECT 1 FROM `like` WHERE postId = ? AND userId = ? LIMIT 1',
+      [postId, req.user.id]
+    );
+    const likeCount = await likeCountForPost(postId);
+    res.json({ liked: mine.length > 0, likeCount });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -72,5 +93,6 @@ const toggleLike = async (req, res) => {
 module.exports = {
   addComment,
   deleteComment,
-  toggleLike
+  toggleLike,
+  getLikeStatus
 };

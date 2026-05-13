@@ -102,6 +102,18 @@ const initDb = async () => {
       )
     `);
 
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS post_view (
+        id VARCHAR(36) PRIMARY KEY,
+        postId VARCHAR(36) NOT NULL,
+        ip VARCHAR(45),
+        userAgent TEXT,
+        viewedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_post_viewed (postId, viewedAt),
+        FOREIGN KEY (postId) REFERENCES post(id) ON DELETE CASCADE
+      )
+    `);
+
     console.log('Database tables and columns verified.');
   } catch (error) {
     console.error('Error initializing database:', error);

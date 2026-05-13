@@ -4,10 +4,11 @@ import api from '@/services/api';
 import { Post } from '@/types';
 import Link from 'next/link';
 
-// Fetch post data for metadata and page content
+// Server fetches must not count views (wrong IP + double fetch for metadata + page).
+// Real views are recorded client-side via POST /posts/:slug/view.
 async function getPost(slug: string): Promise<Post | null> {
   try {
-    const res = await api.get(`/posts/${slug}`);
+    const res = await api.get(`/posts/${slug}`, { params: { track: '0' } });
     return res.data;
   } catch (error: any) {
     console.error('SERVER-SIDE FETCH ERROR:', error.message, 'for slug:', slug);
