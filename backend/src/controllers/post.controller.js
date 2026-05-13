@@ -129,7 +129,7 @@ const getPostBySlug = async (req, res) => {
       const ip = getClientIp(req);
       const userAgent = req.headers['user-agent'] || null;
       await pool.query(
-        'INSERT INTO post_view (id, postId, ip, userAgent) VALUES (?, ?, ?, ?)',
+        'INSERT INTO post_view (id, postId, ip, userAgent, viewedAt) VALUES (?, ?, ?, ?, NOW())',
         [viewId, post.id, ip, userAgent]
       );
     }
@@ -181,7 +181,7 @@ const recordPostView = async (req, res) => {
 
     await pool.query('UPDATE post SET views = views + 1 WHERE id = ?', [post.id]);
     await pool.query(
-      'INSERT INTO post_view (id, postId, ip, userAgent) VALUES (?, ?, ?, ?)',
+      'INSERT INTO post_view (id, postId, ip, userAgent, viewedAt) VALUES (?, ?, ?, ?, NOW())',
       [uuidv4(), post.id, ip, userAgent]
     );
     res.status(204).send();

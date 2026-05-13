@@ -19,6 +19,16 @@ const initDb = async () => {
       )
     `);
 
+    try {
+      await connection.query(`
+        ALTER TABLE user
+        MODIFY COLUMN createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        MODIFY COLUMN updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      `);
+    } catch (err) {
+      if (err.errno !== 1054) console.warn('user table timestamp defaults:', err.message);
+    }
+
     await connection.query(`
       CREATE TABLE IF NOT EXISTS category (
         id VARCHAR(36) PRIMARY KEY,
@@ -53,6 +63,16 @@ const initDb = async () => {
         FOREIGN KEY (categoryId) REFERENCES category(id) ON DELETE SET NULL
       )
     `);
+
+    try {
+      await connection.query(`
+        ALTER TABLE post
+        MODIFY COLUMN createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        MODIFY COLUMN updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      `);
+    } catch (err) {
+      if (err.errno !== 1054) console.warn('post table timestamp defaults:', err.message);
+    }
 
     // Force add columns using try-catch to ignore if they already exist
     const addCol = async (col, def) => {
@@ -91,6 +111,15 @@ const initDb = async () => {
       )
     `);
 
+    try {
+      await connection.query(`
+        ALTER TABLE comment
+        MODIFY COLUMN createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      `);
+    } catch (err) {
+      if (err.errno !== 1054) console.warn('comment table timestamp defaults:', err.message);
+    }
+
     await connection.query(`
       CREATE TABLE IF NOT EXISTS \`like\` (
         id VARCHAR(36) PRIMARY KEY,
@@ -113,6 +142,15 @@ const initDb = async () => {
         FOREIGN KEY (postId) REFERENCES post(id) ON DELETE CASCADE
       )
     `);
+
+    try {
+      await connection.query(`
+        ALTER TABLE post_view
+        MODIFY COLUMN viewedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      `);
+    } catch (err) {
+      if (err.errno !== 1054) console.warn('post_view table timestamp defaults:', err.message);
+    }
 
     console.log('Database tables and columns verified.');
   } catch (error) {

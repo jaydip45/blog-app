@@ -18,7 +18,7 @@ const register = async (req, res) => {
     const id = uuidv4();
 
     await pool.query(
-      'INSERT INTO user (id, name, email, password) VALUES (?, ?, ?, ?)',
+      'INSERT INTO user (id, name, email, password, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())',
       [id, name, email, hashedPassword]
     );
 

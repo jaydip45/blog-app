@@ -6,7 +6,7 @@ const addComment = async (req, res) => {
   const id = uuidv4();
   try {
     await pool.query(
-      'INSERT INTO comment (id, content, postId, userId) VALUES (?, ?, ?, ?)',
+      'INSERT INTO comment (id, content, postId, userId, createdAt) VALUES (?, ?, ?, ?, NOW())',
       [id, content, postId, req.user.id]
     );
 

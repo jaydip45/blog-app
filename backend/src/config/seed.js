@@ -16,14 +16,14 @@ async function seed() {
 
     // Admin
     await connection.query(`
-      INSERT IGNORE INTO user (id, name, email, password, role) 
-      VALUES (?, ?, ?, ?, ?)
+      INSERT IGNORE INTO user (id, name, email, password, role, createdAt, updatedAt) 
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `, [adminId, 'Admin User', 'gadhavijaydip45@gmail.com', adminPassword, 'ADMIN']);
 
     // Updated Author
     await connection.query(`
-      INSERT IGNORE INTO user (id, name, email, password, role) 
-      VALUES (?, ?, ?, ?, ?)
+      INSERT IGNORE INTO user (id, name, email, password, role, createdAt, updatedAt) 
+      VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     `, [authorId, 'jaydip Gadhavi', 'gadhavijaydip45@gmail.com', authorPassword, 'AUTHOR']);
 
     // Categories
@@ -39,8 +39,8 @@ async function seed() {
     // Posts
     const postId = uuidv4();
     await connection.query(`
-      INSERT IGNORE INTO post (id, title, slug, content, published, authorId, categoryId)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT IGNORE INTO post (id, title, slug, content, published, authorId, categoryId, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `, [postId, 'The Evolution of Cricket', 'evolution-of-cricket', 'Cricket has evolved significantly over the years...', 1, authorId, cricketId]);
 
     // Post Tags
