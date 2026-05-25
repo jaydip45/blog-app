@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Share2, Heart, MessageSquare, ChevronLeft, Clock, BookOpen } from 'lucide-react';
+import { Share2, Heart, MessageSquare, ChevronLeft, Clock, BookOpen, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
@@ -24,6 +24,7 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [likeCount, setLikeCount] = useState(post._count?.likes ?? 0);
+  const [viewCount, setViewCount] = useState(post.views);
   const [liked, setLiked] = useState(false);
   const [likeBusy, setLikeBusy] = useState(false);
   const [shareHint, setShareHint] = useState<string | null>(null);
@@ -33,6 +34,10 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
   useEffect(() => {
     setLikeCount(post._count?.likes ?? 0);
   }, [post.id, post._count?.likes]);
+
+  useEffect(() => {
+    setViewCount(post.views);
+  }, [post.id, post.views]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -60,7 +65,11 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
   }, [shareHint]);
 
   useEffect(() => {
-    api.post(`/posts/${encodeURIComponent(post.slug)}/view`).catch(() => {});
+    api.post(`/posts/${encodeURIComponent(post.slug)}/view`)
+      .then(() => {
+        setViewCount((prev) => prev + 1);
+      })
+      .catch(() => {});
   }, [post.slug]);
 
   useEffect(() => {
@@ -180,6 +189,13 @@ export default function PostDetailClient({ post }: PostDetailClientProps) {
                 <span className="inline-flex items-center gap-1.5" title="Estimated reading time">
                   <Clock className="w-4 h-4 shrink-0" aria-hidden />
                   <span>{readMinutes} min read</span>
+                </span>
+                <span className="hidden sm:inline text-slate-300 dark:text-slate-600" aria-hidden>
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5" title="Views">
+                  <Eye className="w-4.5 h-4.5 text-slate-400 dark:text-slate-500 shrink-0" aria-hidden />
+                  <span className="tabular-nums">{viewCount} views</span>
                 </span>
               </div>
             </div>

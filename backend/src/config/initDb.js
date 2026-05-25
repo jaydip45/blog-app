@@ -133,14 +133,14 @@ const initDb = async () => {
 
     await connection.query(`
       CREATE TABLE IF NOT EXISTS post_view (
-        id VARCHAR(36) PRIMARY KEY,
-        postId VARCHAR(36) NOT NULL,
+        id VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci PRIMARY KEY,
+        postId VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
         ip VARCHAR(45),
         userAgent TEXT,
         viewedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_post_viewed (postId, viewedAt),
         FOREIGN KEY (postId) REFERENCES post(id) ON DELETE CASCADE
-      )
+      ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
     `);
 
     try {
